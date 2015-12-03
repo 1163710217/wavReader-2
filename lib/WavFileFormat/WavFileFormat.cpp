@@ -75,7 +75,7 @@ bool WavFileFormat::readFromStream(ByteOrderStreamIn<> &stream)
             break;
         case WAVE_FORMAT_EXTENSIBLE:
 
-            stream  >> m_cbSize
+            /*stream  >> m_cbSize
                     >> m_wValidBitsPerSample
                     >> m_dwChannelMask;
             stream.Read(m_subFormat,    sizeof(m_subFormat));
@@ -83,7 +83,7 @@ bool WavFileFormat::readFromStream(ByteOrderStreamIn<> &stream)
             stream >> m_subChunk2Size
                    >> m_sampleLength
                     ;
-            break;
+            break;*/
         case WAVE_FORMAT_ALAW:
         case WAVE_FORMAT_MULAW:
         default:
@@ -95,12 +95,29 @@ bool WavFileFormat::readFromStream(ByteOrderStreamIn<> &stream)
 
     stream.Read(m_subChunk3Id,  sizeof(m_subChunk3Id));
     stream >> m_subChunk3Size;
-    size_t subChunk3Count = m_subChunk3Size/ 8;
+    size_t subChunk3Count = m_subChunk3Size/ (m_bitsPerSample / 8) / m_numChannels;
     data.resize(subChunk3Count);
     for (size_t i=0; i< subChunk3Count;i++) {
-        data[i].d.resize(2);
-        stream >> data[i].d[0];
-        stream >> data[i].d[1];
+        data[i].d.resize(m_numChannels);
+        for (size_t channel = 0; channel < m_numChannels; channel++) {
+            float &channelValue = data[i].d[channel];
+            switch(m_audioFormat)
+            {
+                case WAVE_FORMAT_PCM:{
+                    int16_t value;
+                    stream >> value;
+                    channelValue =  value / 32768.;
+                    if( channelValue > 1 ) channelValue = 1;
+                    if( channelValue < -1 ) channelValue = -1;
+                    }
+                    break;
+                case WAVE_FORMAT_IEEE_FLOAT:
+                    stream >> channelValue;
+                    break;
+
+            };
+
+        }
     }
 
     return true;
@@ -108,7 +125,7 @@ bool WavFileFormat::readFromStream(ByteOrderStreamIn<> &stream)
 
 bool WavFileFormat::fillAudioData(float *out, size_t playProgress) const
 {
-    if (!playProgress >= data.size()) {
+    if (playProgress >= data.size()) {
         for (size_t i=0; i< m_numChannels; i++){
             *out++ = 0.0;
         }

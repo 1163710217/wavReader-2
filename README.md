@@ -5,11 +5,12 @@
 
 Зависимости:
 
-Qt4+
+- Qt{4,5}
+- PortAudio 19+
+- Система сборки QBS (Qt Creator 2.8+).
 
-PortAudio 19+
+Поддерживаемые форматы WAV:
+- FORMAT_PCM
+- FORMAT_IEEE_FLOAT
 
-Система сборки QBS (Qt Creator 2.8+).
-
-
-Пока поддерживается только проигрывание в WAVE_FORMAT_IEEE_FLOAT формате (см. тестовый файл).
+(см. тестовый файл).

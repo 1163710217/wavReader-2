@@ -49,8 +49,8 @@ Project {
          Export {
              Depends { name: 'cpp'; }
              Depends { name: 'WavFileFormat'; }
-             cpp.staticLibraries: ['portaudio'];
-             cpp.libraryPaths: base.concat([project.paLib]);
+             cpp.staticLibraries: [project.paLib + 'libportaudio.a', 'asound', 'pthread'];
+          //   cpp.libraryPaths: base.concat([]);
              cpp.includePaths: base.concat(['lib/'+ product.name , project.paInclude]);
          }
      }
