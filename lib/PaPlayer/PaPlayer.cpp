@@ -11,7 +11,7 @@ static int wavPlayCallback( const void *, void *outputBuffer,
                             void *userData)
 {
     PaPlayer *player = (PaPlayer *) userData;
-    WavFileFormat *waveData = player->wavFile();
+    const WavFileFormat *const waveData = player->wavFile();
     float * out = (float*)outputBuffer;
 
     int result = paContinue;
@@ -35,7 +35,7 @@ static void StreamFinished( void * userData)
 
 
 PaPlayer::PaPlayer()
-    : m_wavFile(NULL)
+    : m_wavFile(new WavFileFormat())
     , m_stream(NULL)
     ,m_isPlaying(false)
     ,m_playProgress(0)
@@ -44,16 +44,15 @@ PaPlayer::PaPlayer()
     err = Pa_Initialize();
     if( err != paNoError ) {
          Pa_Terminate();
-         throw std::runtime_error("Failed to initialize portAudio.");
+         std::cerr << "Failed to initialize portAudio. Error:" << err;
+         std::abort();
     }
-    m_wavFile = new WavFileFormat();
 }
 
 PaPlayer::~PaPlayer()
 {
     close();
     Pa_Terminate();
-    delete m_wavFile ;
 }
 
 std::string PaPlayer::lastError() const
@@ -61,9 +60,9 @@ std::string PaPlayer::lastError() const
     return m_lastError;
 }
 
-WavFileFormat *PaPlayer::wavFile() const
+const WavFileFormat * PaPlayer::wavFile() const
 {
-    return m_wavFile;
+    return m_wavFile.get();
 }
 
 bool PaPlayer::openFile(const std::string &fileName)

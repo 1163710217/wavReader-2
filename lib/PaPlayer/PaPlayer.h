@@ -1,6 +1,7 @@
 #ifndef PAPLAYER_H
 #define PAPLAYER_H
 #include <string>
+#include <memory>
 class WavFileFormat;
 typedef void PaStream;
 /**
@@ -15,7 +16,7 @@ typedef void PaStream;
  * hasFinished() - показывает, завершилось ли уже проигрывание.
  */
 class PaPlayer {
-    WavFileFormat *m_wavFile;
+    std::unique_ptr<WavFileFormat> m_wavFile;
     PaStream *m_stream;
     std::string m_lastError;
     bool m_isPlaying;
@@ -26,7 +27,7 @@ public:
     PaPlayer();
     ~PaPlayer();
     std::string lastError() const;
-    WavFileFormat *wavFile() const;
+    const WavFileFormat * wavFile() const;
     bool openFile(const std::string& fileName);
     bool initStream();
     bool play();
